@@ -64,6 +64,7 @@ def main():
         
         plt.plot(fs, np.abs(ffts))
         plt.plot(fl, np.abs(fftl))
+        plt.xlim([0, 200])
         plt.show()
 
     def PartB():
@@ -86,6 +87,7 @@ def main():
 
         plt.plot(freqs_sin, ft_sin)
         plt.plot(freqs_square, ft_square)
+        plt.xlim([0, 10000])
         plt.show()
 
     def PartC():
@@ -128,8 +130,12 @@ def main():
         freqs_j, fft_j, ft_j = FFT(x_j, y_j)
         freqs_m, fft_m, ft_m = FFT(x_m, y_m)
 
+        ft_j = [100*f/max(ft_j) for f in ft_j]
+        ft_m = [100*f/max(ft_m) for f in ft_m]
+
         plt.plot(freqs_j, ft_j)
         plt.plot(freqs_m, ft_m)
+        plt.xlim([1000, 3000])
         plt.show()
 
 
@@ -151,6 +157,7 @@ def main():
         for v in vowels:
             for p in people:
                 freqs_p_v, fft_p_v, ft_p_v = fft_from_file('parte_'+p+'_'+v+'.csv')
+                ft_p_v = [100*f/max(ft_p_v) for f in ft_p_v]
                 plt.title('Vowel: '+v+'\nBlue: Michael, Orange: Justin')
                 plt.plot(freqs_p_v, ft_p_v)
             plt.show()
@@ -160,16 +167,20 @@ def main():
         print("Part F:")
         print("#"*10)
 
-        def find_peaks(y):
+        def find_peaks(x, y):
+            xs = np.array([])
             peaks = np.array([])
-            buf = 10
+            buf = 2
             for i, amp in enumerate(y):
                 if i<buf or len(y)-i<buf: continue
-                if max(y[i-buf:i+buf])==amp and amp>max(y)/7.:
+                if max(y[i-buf:i+buf])==amp and amp>=5:
                     peaks = np.append(peaks, amp)
+                    xs = np.append(xs, x[i])
             scale = max(peaks)/100.
-            peaks = [yi/scale for yi in y if yi/scale>=5]
-            return peaks
+            peaks = [yi/scale for yi in peaks if yi/scale>=5]
+            f0 = xs[0]
+            xs = np.divide(xs, f0)
+            return xs, peaks
 
         d_voice  = np.loadtxt('partf_voice.csv' , delimiter=',', unpack=True, dtype=np.float64)
         d_guitar = np.loadtxt('partf_guitar.csv', delimiter=',', unpack=True, dtype=np.float64)
@@ -189,28 +200,33 @@ def main():
         freqs_g, fft_g, ft_g = FFT(x_g, y_g)
         freqs_p, fft_p, ft_p = FFT(x_p, y_p)
 
+        ft_v = [100*f/max(ft_v) for f in ft_v]
+        ft_g = [100*f/max(ft_g) for f in ft_g]
+        ft_p = [100*f/max(ft_p) for f in ft_p]
+
         plt.plot(freqs_v, ft_v)
         plt.plot(freqs_g, ft_g)
         plt.plot(freqs_p, ft_p)
+        plt.xlim([0, 10000])
         plt.title("Blue: voice, Orange: guitar, Green: piano")
         plt.show()
 
-        peaks_v = find_peaks(ft_v)
-        peaks_g = find_peaks(ft_g)
-        peaks_p = find_peaks(ft_p)
-        
-        plt.plot(range(len(peaks_v)), peaks_v, 'o')
-        plt.plot(range(len(peaks_g)), peaks_g, 'o')
-        plt.plot(range(len(peaks_p)), peaks_p, 'o')
+        harmonics_v, peaks_v = find_peaks(freqs_v, ft_v)
+        harmonics_g, peaks_g = find_peaks(freqs_g, ft_g)
+        harmonics_p, peaks_p = find_peaks(freqs_p, ft_p)
+
+        plt.plot(harmonics_v, peaks_v, 'o')
+        plt.plot(harmonics_g, peaks_g, 'o')
+        plt.plot(harmonics_p, peaks_p, 'o')
         plt.title("Blue: voice, Orange: guitar, Green: piano")
         plt.show()
 
 
-    #PartA()
-    #PartB()
-    #PartC()
-    #PartD()
-    #PartE()
+    PartA()
+    PartB()
+    PartC()
+    PartD()
+    PartE()
     PartF()
     return
 
